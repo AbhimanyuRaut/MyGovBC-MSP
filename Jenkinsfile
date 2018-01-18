@@ -8,7 +8,7 @@ def TAG_NAMES = ['dev', 'test', 'prod']
 // You shouldn't have to edit these if you're following the conventions
 def NGINX_BUILD_CONFIG = 'nginx-runtime-splash'
 def BUILD_CONFIG = 'msp-splash-build'
-def IMAGESTREAM_NAME = APP_NAME + '-' + APP_VERSION
+def IMAGESTREAM_NAME = 'msp-splash'
 
 node {
 
