@@ -1,12 +1,12 @@
 // Edit your app's name below
 def APP_NAME = 'msp'
-def APP_VERSION = '1.3'
+def APP_VERSION = 'msp-splash'
 
 // Edit your environment TAG names below
 def TAG_NAMES = ['dev', 'test', 'prod']
 
 // You shouldn't have to edit these if you're following the conventions
-def NGINX_BUILD_CONFIG = 'nginx-runtime'
+def NGINX_BUILD_CONFIG = 'nginx-runtime-splash'
 def BUILD_CONFIG = APP_NAME + '-' + APP_VERSION + '-build'
 def IMAGESTREAM_NAME = APP_NAME + '-' + APP_VERSION
 

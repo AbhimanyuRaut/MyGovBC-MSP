@@ -43,11 +43,11 @@
           "sourceStrategy": {
             "from": {
                 "kind": "ImageStreamTag",
-                "name": "angular-builder-${GIT_REFERENCE}:latest"
+                "name": "angular-builder-splash:latest"
             },
             "runtimeImage": {
               "kind": "ImageStreamTag",
-              "name": "nginx-runtime:latest"
+              "name": "nginx-runtime-splash:latest"
             },
             "runtimeArtifacts": [{
               "sourcePath": "/opt/app-root/src/dist/",
