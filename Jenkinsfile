@@ -1,5 +1,5 @@
 // Edit your app's name below
-def APP_NAME = 'msp'
+def APP_NAME = 'msp-splash'
 def APP_VERSION = 'msp-splash'
 
 // Edit your environment TAG names below
