@@ -1,13 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-// import { MspDataService } from '../service/msp-data.service';
-import {MspDataService} from '../service/msp-data.service';
-
-
-import {Router} from '@angular/router';
-import {MspImage} from "../model/msp-image";
-import {MspImageErrorModalComponent} from "../common/image-error-modal/image-error-modal.component";
-import {FileUploaderComponent} from "../common/file-uploader/file-uploader.component";
-
+import {MspConsentModalComponent} from "../common/consent-modal/consent-modal.component";
 /**
  * Application for MSP
  *
@@ -20,24 +12,13 @@ import {FileUploaderComponent} from "../common/file-uploader/file-uploader.compo
 })
 export class LandingComponent {
     lang = require('./i18n')
+    @ViewChild('mspConsentModal') mspConsentModal: MspConsentModalComponent;
 
-    constructor(private mspDataService: MspDataService, private router: Router) {}
+    constructor() {}
 
-    clearSavedFinAssisApp() {
-        console.log('deleting saved fin assist app.');
-        this.mspDataService.removeFinAssistApplication();
-        this.router.navigate(['/msp/assistance/prepare']);
 
-    }
-
-    clearSavedMspApp() {
-        this.mspDataService.removeMspApplication();
-        this.router.navigate(['/msp/application/prepare']);
-    }
-
-    clearSavedAccountApp() {
-        this.mspDataService.removeMspAccountApp();
-        this.router.navigate(['/msp/account/prepare']);
+    ngAfterViewInit() {
+        this.mspConsentModal.showFullSizeView();
     }
 
 }

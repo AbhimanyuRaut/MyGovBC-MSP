@@ -1,9 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild, Inject} from '@angular/core'
 import * as moment from 'moment';
 import {ModalDirective} from "ngx-bootstrap";
-import {ApplicationBase} from "../../model/application-base.model";
-// jam - trying to inject appConstants
-// 
+
 
 import { environment } from '../../../../../environments/environment';
 
@@ -16,7 +14,6 @@ export class MspConsentModalComponent {
   lang = require('./i18n');
 
   @Input() processName: string;
-  @Input() application: ApplicationBase;
   @ViewChild('fullSizeViewModal') public fullSizeViewModal: ModalDirective;
   @Output() onClose = new EventEmitter<void>();
 
@@ -36,7 +33,6 @@ export class MspConsentModalComponent {
   }
 
   continue() {
-    this.application.infoCollectionAgreement = true;
     this.fullSizeViewModal.hide();
     this.onClose.emit();
   }

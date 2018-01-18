@@ -1,8 +1,12 @@
+<msp-consent-modal #mspConsentModal
+>
+</msp-consent-modal>
+
 <div class="container" style="margin-top: 30px">
 
   <div class="row">
     <div class="col-xs-12 col-sm-6">
-      <button class="btn btn-primary btn-lg btn-block" (click) = "clearSavedMspApp()">
+      <button class="btn btn-primary btn-lg btn-block" >
         {{lang('./en/index').newEnrollApp}}
       </button>
       <button class="btn btn-lg btn-block" routerLink="/msp/application/prepare">
@@ -14,7 +18,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <hr>
-      <button class="btn btn-primary btn-lg btn-block" (click) = "clearSavedFinAssisApp()">
+      <button class="btn btn-primary btn-lg btn-block" >
         {{lang('./en/index').newPaApp}}
       </button>
       <button class="btn btn-lg btn-block" routerLink="/msp/assistance/prepare">
@@ -26,7 +30,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <hr>
-      <button class="btn btn-primary btn-lg btn-block" (click) = "clearSavedAccountApp()">
+      <button class="btn btn-primary btn-lg btn-block" >
         {{lang('./en/index').newAccountApp}}
       </button>
       <button class="btn btn-lg btn-block" routerLink="/msp/account/prepare">
