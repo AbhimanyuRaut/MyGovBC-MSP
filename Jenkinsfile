@@ -1,7 +1,7 @@
 // Edit your app's name below
 def APP_NAME = 'msp-splash'
 def APP_VERSION = 'msp-splash'
-def CHAINED_ANGULAR_BUIL = APP_NAME + '-build-angular-app-build'
+def CHAINED_ANGULAR_BUILD = APP_NAME + '-build-angular-app-build'
 
 // Edit your environment TAG names below
 def TAG_NAMES = ['dev', 'test', 'prod']
