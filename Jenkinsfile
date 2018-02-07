@@ -1,6 +1,7 @@
 // Edit your app's name below
 def APP_NAME = 'msp-splash'
 def APP_VERSION = 'msp-splash'
+def CHAINED_ANGULAR_BUIL = APP_NAME + '-build-angular-app-build'
 
 // Edit your environment TAG names below
 def TAG_NAMES = ['dev', 'test', 'prod']
@@ -18,6 +19,8 @@ node {
   }
 
   stage('build ' + BUILD_CONFIG) {
+    echo "Building Chained Angular App: " + CHAINED_ANGULAR_BUILD
+    openshiftBuild bldCfg: CHAINED_ANGULAR_BUILD, showBuildLogs: 'true'
     echo "Building: " + BUILD_CONFIG
     openshiftBuild bldCfg: BUILD_CONFIG, showBuildLogs: 'true'
     openshiftTag destStream: IMAGESTREAM_NAME, verbose: 'true', destTag: '$BUILD_ID', srcStream: IMAGESTREAM_NAME, srcTag: 'latest'
