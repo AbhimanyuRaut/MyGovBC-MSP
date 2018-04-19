@@ -189,6 +189,7 @@ export class PersonalDetailsComponent extends BaseComponent {
   }
 
   deleteDocument(evt:MspImage){
+    console.log("PersonalDetailsComponent MspImage uuid:"+evt.uuid);
     this.person.documents.images = this.person.documents.images.filter( 
       (mspImage:MspImage) => {
         return evt.uuid !== mspImage.uuid;

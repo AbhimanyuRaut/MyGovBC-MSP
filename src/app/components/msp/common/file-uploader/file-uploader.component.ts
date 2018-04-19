@@ -329,8 +329,9 @@ export class FileUploaderComponent
         let mspImage: MspImage = new MspImage();
         let reader: FileReader = new FileReader();
         // Copy file properties
-        if(pageNumber != 0) {
-             mspImage.name = image.name + "-page" + pageNumber;
+        mspImage.name = image.name ;
+        if(pageNumber != 0) { //PDF ..append page page number
+             mspImage.name += "-page" + pageNumber;
         }
         //Temporary so we don't have duplicate file names. TODO: Improve.
         //   mspImage.name += Math.ceil(Math.random()*100);
@@ -633,6 +634,7 @@ export class FileUploaderComponent
     }
 
     deleteImage(mspImage: MspImage) {
+        console.log("FileUploaderComponent delete image:"+JSON.stringify(mspImage,null ,2));
         // this.staticModalRef.show();
         this.resetInputFields();
         this.onDeleteDocument.emit(mspImage);
