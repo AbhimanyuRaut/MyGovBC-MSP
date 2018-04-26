@@ -307,7 +307,7 @@ export class FileUploaderComponent
 
                         images.map((image, index) => {
                             image.name = pdfFile.name;
-                            this.resizeImage( image, self, scaleFactors, observer,index);
+                            this.resizeImage( image, self, scaleFactors, observer,index+1);
                         })
                     }, (error: string) => {
                         console.log("error"+JSON.stringify(error));
@@ -344,6 +344,7 @@ export class FileUploaderComponent
         // Copy file properties
         mspImage.name = image.name ;
         if(pageNumber != 0) { //PDF ..append page page number
+            mspImage.sortOrder = pageNumber;
             mspImage.name += "-page" + pageNumber;
         }
         //Temporary so we don't have duplicate file names. TODO: Improve.

@@ -18,6 +18,7 @@ import {Gender} from "../model/person.model";
 import {OperationActionType} from "../model/person.model";
 import {Address} from "../model/address.model";
 import { SimpleDate } from '../model/simple-date.interface';
+import {MspImage} from "../model/msp-image";
 
 @Injectable()
 export  class MspDataService {
@@ -428,8 +429,22 @@ export  class MspDataService {
         dto.status = input.status;
         dto.currentActivity = input.currentActivity;
 
-        dto.images = input.documents.images;
+        dto.images = input.documents.images.sort((a, b) => {
+          return this.sort(a,b);
+        });
+
         return dto;
+    }
+
+    private sort(a:MspImage, b:MspImage):number {
+        if (a.sortOrder == 0 || b.sortOrder==0) { // only pdfs has sort Order..otherwise dont sort
+            return 0;
+        }
+        if (a.name.substr(0,a.name.lastIndexOf(".pdf")) != b.name.substr(0,a.name.lastIndexOf(".pdf"))) return 0; //Dont sort two different pdfs within them
+        if (a.sortOrder < b.sortOrder) return -1 ;
+        if (a.sortOrder > b.sortOrder) return 1 ;
+        return 0;
+
     }
 
     private fromPersonDto(dto: PersonDto): Person {
@@ -536,7 +551,9 @@ export  class MspDataService {
 
         });
 
-        dto.documents = input.documents;
+        dto.documents = input.documents.sort((a, b) => {
+            return this.sort(a,b);;
+        });
 
         return dto;
 

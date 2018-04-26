@@ -41,6 +41,7 @@ export class MspImage {
   naturalHeight: number;
   naturalWidth: number;
   name:string;
+  sortOrder?:number = 0;
 
   //file uniqness checksum
   id: string;
