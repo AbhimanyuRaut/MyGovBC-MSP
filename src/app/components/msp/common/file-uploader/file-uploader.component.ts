@@ -29,6 +29,7 @@ let loadImage = require('blueimp-load-image');
 var sha1 = require('sha1');
 const PDFJS: PDFJSStatic = require('pdfjs-dist');
 
+
 @Component({
     selector: 'msp-file-uploader',
     templateUrl: './file-uploader.html',
@@ -211,7 +212,7 @@ export class FileUploaderComponent
                             }
                             this.handleError(MspImageError.CannotOpen, error.image);
                         }  else if (MspImageError.CannotOpenPDF === error.errorCode) {
-                        this.handleError(MspImageError.CannotOpenPDF, error.image);
+                                    this.handleError(MspImageError.CannotOpenPDF, error.image ,error.errorDescription);
                     }  else {
                             throw error;
                         }
@@ -280,12 +281,14 @@ export class FileUploaderComponent
         let fileObservable = Observable.create((observer: Observer<MspImage>) => {
 
             let mspImages = [];
+            scaleFactors = scaleFactors.scaleDown(self.appConstants.images.reductionScaleFactor);
             for (var fileIndex = 0; fileIndex < fileList.length; fileIndex++) {
 
                 var file = fileList[fileIndex];
                 console.log('Start processing file ' + fileIndex + ' of ' + fileList.length + ' %s of size %s bytes %s type', file.name, file.size, file.type);
 
-                scaleFactors = scaleFactors.scaleDown(self.appConstants.images.reductionScaleFactor);
+
+                var pdfScaleFactor = self.appConstants.images.pdfScaleFactor;
 
                 // let mspImage: MspImage = new MspImage();
                 // let reader: FileReader = new FileReader();
@@ -293,26 +296,35 @@ export class FileUploaderComponent
                 // // Copy file properties
                 // mspImage.name = file.name;
                 if (file.type == "application/pdf") {
-                    this.readPDF(file, (images: HTMLImageElement[]) => {
+                    this.logService.log({name: file.name + ' Received in Upload',
+                        UUID: self.dataService.getMspUuid()},"File_Upload");
+
+                    this.readPDF(file, pdfScaleFactor,(images: HTMLImageElement[] ,pdfFile: File) => {
+
+
+                        this.logService.log({name: file.name + 'is successfully split into '+images.length +" images",
+                            UUID: self.dataService.getMspUuid()},"File_Upload");
+
                         images.map((image, index) => {
-                            image.name = file.name;
+                            image.name = pdfFile.name;
                             this.resizeImage( image, self, scaleFactors, observer,index);
                         })
-                    }, (error) => {
+                    }, (error: string) => {
+                        console.log("error"+JSON.stringify(error));
                         let imageReadError: MspImageProcessingError =
-                            new MspImageProcessingError(MspImageError.CannotOpenPDF);
+                            new MspImageProcessingError(MspImageError.CannotOpenPDF,error);
                         observer.error(imageReadError);
                     });
                 } else {
-
                     // Load image into img element to read natural height and width
-                    this.readImage(file, (image: HTMLImageElement) => {
-                           image.name = file.name;
+                    this.readImage(file, (image: HTMLImageElement ,imageFile: File)  => {
+                           image.name = imageFile.name;
                             this.resizeImage(image, self, scaleFactors, observer);
                         },
 
                         //can be ignored for bug, the log line is never called
                         (error: MspImageProcessingError) => {
+                            console.log("error"+JSON.stringify(error));
                             observer.error(error);
                         });
                 }
@@ -328,10 +340,11 @@ export class FileUploaderComponent
 // While it's still in an image, get it's height and width
         let mspImage: MspImage = new MspImage();
         let reader: FileReader = new FileReader();
+        console.log("image.name:"+image.name);
         // Copy file properties
         mspImage.name = image.name ;
         if(pageNumber != 0) { //PDF ..append page page number
-             mspImage.name += "-page" + pageNumber;
+            mspImage.name += "-page" + pageNumber;
         }
         //Temporary so we don't have duplicate file names. TODO: Improve.
         //   mspImage.name += Math.ceil(Math.random()*100);
@@ -467,7 +480,7 @@ export class FileUploaderComponent
     };
 
     private readImage(imageFile: File,
-                      callback: (image: HTMLImageElement) => void,
+                      callback: (image: HTMLImageElement,imageFile: File) => void,
                       invalidImageHanlder: (error: MspImageProcessingError) => void) {
         let reader = new FileReader();
 
@@ -481,7 +494,7 @@ export class FileUploaderComponent
             // Wait for onload so all properties are populated
             imgEl.onload = (args) => {
                 console.log('Completed image loading into an img tag: %o', args);
-                return callback(imgEl);
+                return callback(imgEl ,imageFile  );
             };
 
             imgEl.onerror =
@@ -503,11 +516,12 @@ export class FileUploaderComponent
         reader.readAsDataURL(imageFile);
     }
 
-    private readPDF(pdfFile: File,
-                    callback: (image: HTMLImageElement[]) => void, error: (errorReason: any) => void) {
+    private readPDF(pdfFile: File, pdfScaleFactor: number,
+                    callback: (image: HTMLImageElement[],pdfFile: File) => void, error: (errorReason: any) => void) {
 
         PDFJS.disableWorker = true;
         PDFJS.disableStream = true;
+
         let reader = new FileReader();
         var currentPage = 1;
         var canvas = document.createElement('canvas');
@@ -522,8 +536,7 @@ export class FileUploaderComponent
 
                 function getPage() {
                     pdfdoc.getPage(currentPage).then(function (page) {
-                        var scale = 1.5;
-                        var viewport = page.getViewport(scale);
+                        var viewport = page.getViewport(pdfScaleFactor);
 
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
@@ -541,16 +554,16 @@ export class FileUploaderComponent
                                 currentPage++;
                                 getPage();
                             } else {
-                                callback(imgElsArray);
+                                callback(imgElsArray,pdfFile);
                             }
 
                         });
-                    }, function (errorReason) {
+                    }, function (errorReason: string) {
                         error(errorReason);
 
                     });
                 }
-            }, function (errorReason) {
+            }, function (errorReason: string) {
                 error(errorReason);
             });
 
@@ -603,7 +616,7 @@ export class FileUploaderComponent
         }
     }
 
-    handleError(error: MspImageError, mspImage: MspImage) {
+    handleError(error: MspImageError, mspImage: MspImage, errorDescription?:string) {
 
         if (!mspImage) {
             mspImage = new MspImage();
@@ -615,7 +628,7 @@ export class FileUploaderComponent
         if (error != MspImageError.PDFnotSupported) {
             this.logImageInfo("msp_file-uploader_error", this.dataService.getMspUuid(), mspImage,
                 "  mspImageFile: " + mspImage.name + "  mspErrorNum: " + error + "  mspError: " +
-                MspImageError[error]);
+                error+"-"+errorDescription);
         }
 
         // console.log("error with image: ", mspImage);
@@ -634,7 +647,6 @@ export class FileUploaderComponent
     }
 
     deleteImage(mspImage: MspImage) {
-        console.log("FileUploaderComponent delete image:"+JSON.stringify(mspImage,null ,2));
         // this.staticModalRef.show();
         this.resetInputFields();
         this.onDeleteDocument.emit(mspImage);
