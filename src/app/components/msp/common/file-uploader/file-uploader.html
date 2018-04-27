@@ -1,6 +1,14 @@
 <form #formRef="ngForm">
 <div class="dropzone" #dropZone>
   <div class="instruction-zone">
+
+    <div *ngIf="showPdfInProgressSpinner" class="center-block" role="alert" aria-live="assertive">
+      <h4 [innerHtml]="lang('./en/index.js').pageTitleRedirect"></h4>
+      <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+      <span class="sr-only">processing your request ...</span>
+    </div>
+
+
         <input type="file" id="fileUploadBrowse-{{id}}" #browseFileRef accept="image/*,application/pdf"
            style="display:none;" tabindex="0" multiple />
         <label for="fileUploadBrowse-{{id}}" class="file-upload-label"

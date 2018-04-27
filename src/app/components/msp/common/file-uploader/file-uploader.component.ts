@@ -57,6 +57,13 @@ export class FileUploaderComponent
 
     @ViewChild('canvas') canvas: ElementRef;
 
+    /*
+        setting true shows the spinner
+        set it to true => while pdf is processed or pdf extracted images are resized
+        set it to false => on error conditions ; for last page of pdf ; for normal images as well...
+
+     */
+    showPdfInProgressSpinner: boolean = false;
 
     @Output() onAddDocument: EventEmitter<MspImage> = new EventEmitter<MspImage>();
     @Output() onErrorDocument: EventEmitter<MspImage> = new EventEmitter<MspImage>();
@@ -195,7 +202,7 @@ export class FileUploaderComponent
 
                 (error) => {
                     console.log('Error in loading image: %o', error);
-
+                    this.showPdfInProgressSpinner = false;
                     /**
                      * Handle the error if the image is gigantic that after
                      * 100 times of scaling down by 30% on each step, the image
@@ -301,13 +308,11 @@ export class FileUploaderComponent
 
                     this.readPDF(file, pdfScaleFactor,(images: HTMLImageElement[] ,pdfFile: File) => {
 
-
                         this.logService.log({name: file.name + 'is successfully split into '+images.length +" images",
                             UUID: self.dataService.getMspUuid()},"File_Upload");
-
                         images.map((image, index) => {
                             image.name = pdfFile.name;
-                            this.resizeImage( image, self, scaleFactors, observer,index+1);
+                            this.resizeImage( image, self, scaleFactors, observer,index+1 ,(index == images.length-1));
                         })
                     }, (error: string) => {
                         console.log("error"+JSON.stringify(error));
@@ -336,7 +341,14 @@ export class FileUploaderComponent
     }
 
 
-    private resizeImage( image: HTMLImageElement, self: this, scaleFactors: MspImageScaleFactors, observer: Observer<MspImage>, pageNumber: number = 0) {
+    private resizeImage( image: HTMLImageElement, self: this, scaleFactors: MspImageScaleFactors, observer: Observer<MspImage>, pageNumber: number = 0 , isLastPage: boolean = false  ) {
+
+        if (pageNumber == 0) { //if not pdf ;hide spinner
+            this.showPdfInProgressSpinner = false;
+        } else if (!isLastPage) { //if pdf and is not last page ;show spinner
+            this.showPdfInProgressSpinner = true;
+        }
+
 // While it's still in an image, get it's height and width
         let mspImage: MspImage = new MspImage();
         let reader: FileReader = new FileReader();
@@ -427,6 +439,10 @@ export class FileUploaderComponent
                                 // log image info
                                 //   self.logImageInfo("msp_file-uploader_after_resize_attributes", self.dataService.getMspUuid(), mspImage);
                                 observer.next(mspImage);
+
+                                if(isLastPage) {
+                                    self.showPdfInProgressSpinner = false;
+                                }
                             }
                         };
                         reader.readAsDataURL(blob);
@@ -519,7 +535,7 @@ export class FileUploaderComponent
 
     private readPDF(pdfFile: File, pdfScaleFactor: number,
                     callback: (image: HTMLImageElement[],pdfFile: File) => void, error: (errorReason: any) => void) {
-
+        this.showPdfInProgressSpinner = true;
         PDFJS.disableWorker = true;
         PDFJS.disableStream = true;
 
