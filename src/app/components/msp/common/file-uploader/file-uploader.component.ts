@@ -268,6 +268,7 @@ export class FileUploaderComponent
 
         // Init
         let self = this;
+        var  pageNumber = Math.max(...self.images.map(function(o){return o.attachmentOrder;}),0) +1  ;  // get current max page number
 
         // Create our observer
         let fileObservable = Observable.create((observer: Observer<MspImage>) => {
@@ -289,7 +290,15 @@ export class FileUploaderComponent
                     this.logService.log({name: file.name + ' Received in Upload',
                         UUID: self.dataService.getMspUuid()},"File_Upload");
 
-                    this.readPDF(file, pdfScaleFactor,(images: HTMLImageElement[] ,pdfFile: File) => {
+                    /**
+                     *  Page number logic :
+                     *      Images - Assign current page number whichever is available..so get the current page number , pass it to call back [reserve it] and increment
+                     *      PDF    -  we dont know how many pages..so cant get current number and keep it since it can be multiple pages... so start assigning later point
+                     *      when PDF is totally read..
+                     *
+                     *  */
+
+                    this.readPDF(file, pdfScaleFactor,(images: HTMLImageElement[] ,pdfFile: File ) => {
 
 
                         this.logService.log({name: file.name + 'is successfully split into '+images.length +" images",
@@ -297,7 +306,8 @@ export class FileUploaderComponent
 
                         images.map((image, index) => {
                             image.name = pdfFile.name;
-                            this.resizeImage( image, self, scaleFactors, observer,index);
+                            this.resizeImage( image, self, scaleFactors, observer,pageNumber , true);//index starts from zero
+                            pageNumber = pageNumber + 1  ;
                         })
                     }, (error: string) => {
                         console.log("error"+JSON.stringify(error));
@@ -307,9 +317,9 @@ export class FileUploaderComponent
                     });
                 } else {
                     // Load image into img element to read natural height and width
-                    this.readImage(file, (image: HTMLImageElement ,imageFile: File)  => {
+                    this.readImage(file, pageNumber , (image: HTMLImageElement ,imageFile: File ,pageNumber: number )  => {
                             image.id = imageFile.name; //.name deprecated, changed image.name to image.id
-                            this.resizeImage(image, self, scaleFactors, observer);
+                            this.resizeImage(image, self, scaleFactors, observer , pageNumber );
                         },
 
                         //can be ignored for bug, the log line is never called
@@ -317,6 +327,7 @@ export class FileUploaderComponent
                             console.log("error"+JSON.stringify(error));
                             observer.error(error);
                         });
+                    pageNumber = pageNumber + 1  ;
                 }
             }
 
@@ -326,16 +337,18 @@ export class FileUploaderComponent
     }
 
 
-    private resizeImage( image: HTMLImageElement, self: this, scaleFactors: MspImageScaleFactors, observer: Observer<MspImage>, pageNumber: number = 0) {
+    private resizeImage( image: HTMLImageElement, self: this, scaleFactors: MspImageScaleFactors, observer: Observer<MspImage>, pageNumber: number = 0 ,isPdf: boolean = false) {
 // While it's still in an image, get it's height and width
         let mspImage: MspImage = new MspImage();
         let reader: FileReader = new FileReader();
-        console.log("image.name:"+image.id); //.name deprecated, changed image.name to image.id
+            console.log("image.name:"+image.id+"pageNumber:"+pageNumber); //.name deprecated, changed image.name to image.id
         // Copy file properties
         mspImage.name = image.id ;
-        if(pageNumber != 0) { //PDF ..append page page number
-            mspImage.name += "-page" + pageNumber;
+        if(isPdf) {
+            mspImage.name = image.name+"-page" + pageNumber;  //Just give name to pdf
         }
+        mspImage.attachmentOrder = pageNumber ;
+
         //Temporary so we don't have duplicate file names. TODO: Improve.
         //   mspImage.name += Math.ceil(Math.random()*100);
 
@@ -485,8 +498,8 @@ export class FileUploaderComponent
         }
     };
 
-    private readImage(imageFile: File,
-                      callback: (image: HTMLImageElement,imageFile: File) => void,
+    private readImage(imageFile: File, nextPageNumber: number ,
+                      callback: (image: HTMLImageElement,imageFile: File , nextPageNumber: number) => void,
                       invalidImageHanlder: (error: MspImageProcessingError) => void) {
         let reader = new FileReader();
 
@@ -500,7 +513,7 @@ export class FileUploaderComponent
             // Wait for onload so all properties are populated
             imgEl.onload = (args) => {
                 console.log('Completed image loading into an img tag: %o', args);
-                return callback(imgEl ,imageFile  );
+                return callback(imgEl ,imageFile ,nextPageNumber );
             };
 
             imgEl.onerror =

@@ -643,6 +643,7 @@ export class MspApiService {
             // uuid
             toAttachment.attachmentUuid = attachment.uuid;
 
+            toAttachment.attachmentOrder = String(attachment.attachmentOrder) ;
             // user does NOT provide description so it's left blank for now, may be used in future
 
             // Add to array
@@ -692,7 +693,8 @@ export class MspApiService {
 
             // uuid
             toAttachment.attachmentUuid = attachment.uuid;
-
+           
+            toAttachment.attachmentOrder = String(attachment.attachmentOrder) ;
             // user does NOT provide description so it's left blank for now, may be used in future
 
             // Add to array

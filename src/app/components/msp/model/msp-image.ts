@@ -46,6 +46,8 @@ export class MspImage {
   id: string;
 
   error?: MspImageError;
+
+  attachmentOrder: number =0  ;  // order in which user uploads the documents
 }
 
 export interface MspImageScaleFactors {

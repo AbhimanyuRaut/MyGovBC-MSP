@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {MspApplication, Person} from '../model/application.model';
 import {MspAccountApp} from '../model/account.model';
+import {MspImage} from "../model/msp-image";
 import PersonDto from '../model/person.dto';
 import {FinancialAssistApplication} from '../model/financial-assist-application.model';
 import {LocalStorageService} from 'angular-2-local-storage';
@@ -428,9 +429,10 @@ export  class MspDataService {
         dto.status = input.status;
         dto.currentActivity = input.currentActivity;
 
-        dto.images = input.documents.images;
+        dto.images = input.documents.images.sort((a, b) =>  a.attachmentOrder-b.attachmentOrder);
         return dto;
     }
+
 
     private fromPersonDto(dto: PersonDto): Person {
         let output: Person = new Person(dto.relationship);
@@ -536,7 +538,7 @@ export  class MspDataService {
 
         });
 
-        dto.documents = input.documents;
+        dto.documents = input.documents.sort((a, b) =>  a.attachmentOrder-b.attachmentOrder);
 
         return dto;
 
