@@ -42,7 +42,9 @@
     "pdfjs-dist": "^2.0.550",
     "pluralize": "^3.0.0",
     "rimraf": "^2.5.2",
-    "protractor": "^5.4.0"
+    "protractor": "^5.4.0",
+    "tslint": "~4.5.0",
+    "codelyzer": "~4.2.1"
   },
   "engines": {
     "node": ">=4.2.5"
